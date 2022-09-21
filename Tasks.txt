@@ -1,0 +1,18 @@
+Por hacer:
+
+-Implementar inventario
+-Consumibles
+-Equipo
+-Drops
+-Mejorar los crecimientos de exp, vida, daño
+-Crear distintos tipos de enemigos -> idea es que cada ronda(10 enemigos) tenga una coleccion de enemigos(se pueden repetir entre rondas)
+    ->Los nuevos enemigos que aparecen en rondas más altas tendran mayores stats base
+    ->Diseño de enemigos
+    ->Para cambiar de ronda AÑADIR BOSS(diseño de boss)
+
+Tras tener el juego base:
+-Buscar una forma de gestión por eventos(pygame)
+-Añadir mini interfaz gráfica para funcionar con clicks
+
+Haciendo:
+-Implementar inventario
