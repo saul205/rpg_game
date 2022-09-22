@@ -3,7 +3,6 @@ from AttackRepository import *
 
 
 class Archer(h.Hero):
-
     _baseHp = 100
     _baseMp = 100
     _baseDmg = 35
@@ -18,7 +17,6 @@ class Archer(h.Hero):
 
 
 class Mage(h.Hero):
-
     _baseHp = 100
     _baseMp = 150
     _baseDmg = 20
@@ -33,7 +31,6 @@ class Mage(h.Hero):
 
 
 class Warrior(h.Hero):
-
     _baseHp = 150
     _baseMp = 50
     _baseDmg = 30

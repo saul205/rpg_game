@@ -1,13 +1,9 @@
-from enum import Enum
-from glob import escape
-from operator import truediv
-from Enemy import *
-from Classes import *
-import random as rand
-import DB as db
-
 import os
+from enum import Enum
 
+import DB as db
+from Classes import *
+from Enemy import *
 from Hero import Hero
 
 
@@ -19,13 +15,12 @@ def cls():
 
 
 class Game:
-
-    class _menu(Enum):
+    class Menu(Enum):
         Nueva_Partida = 1
         Cargar_Partida = 2
         Cerrar_Juego = 3
 
-    class _playerMenu(Enum):
+    class PlayerMenu(Enum):
         Atacar = 1
         Defender = 2
         Inventario = 3
@@ -49,7 +44,7 @@ class Game:
     def __init__(self):
         self.startingRound = 1
         self.enemiesKilled = 0
-        self.round = self.startingRound + int(self.enemiesKilled/10)
+        self.round = self.startingRound + int(self.enemiesKilled / 10)
         self.player = None
         self.enemy = None
         self.estado = self.Estados.MenuPrincipal
@@ -58,76 +53,76 @@ class Game:
         self.toMainMenu = False
         return
 
-    def _printHeader(self):
+    def _print_header(self):
         cls()
         print(self.player)
         print(self.enemy)
 
-    def printPlayerMenu(self):
-        self._printHeader()
+    def print_player_menu(self):
+        self._print_header()
         result = '\nQue quieres hacer'
-        for x in self._playerMenu:
+        for x in self.PlayerMenu:
             result += '\n\t-' + str(x.value) + '. ' + x.name
 
         print(result)
 
-    def printAttackMenu(self):
-        self._printHeader()
-        self.player.printAttacks()
+    def print_attack_menu(self):
+        self._print_header()
+        self.player.print_attacks()
         print("\t-> 0. Volver")
 
-    def _printMenu(self):
+    def _print_menu(self):
         cls()
         result = '\nMenú Principal'
-        for x in self._menu:
+        for x in self.Menu:
             result += '\n\t-' + str(x.value) + '. ' + x.name
         print(result)
 
-    def _saveAction(self):
+    def _save_action(self):
 
-        players = db.PlayerController.getAllPlayers()
+        players = db.PlayerController.get_all_players()
         dictPlayers = {}
         for player in players:
             dictPlayers[player.name] = player
         if self.player.name in dictPlayers:
-            db.PlayerController.updatePlayer(self.player)
+            db.PlayerController.update_player(self.player)
         else:
-            db.PlayerController.savePlayer(self.player)
+            db.PlayerController.save_player(self.player)
 
-    def loadGame(self):
+    def load_game(self):
 
-        players = db.PlayerController.getAllPlayers()
+        players = db.PlayerController.get_all_players()
 
         if len(players) == 0:
             return False
 
         cls()
         print("Personajes:")
-        dictPlayers = {}
+        dict_players = {}
         for player in players:
             print("->", player)
-            dictPlayers[player.name] = player
+            dict_players[player.name] = player
 
         print("-> Volver")
 
         personaje = input("Escoge personaje: ")
-        if personaje in dictPlayers:
-            self.player = db.PlayerEntity.FromEntity(
-                dictPlayers[personaje])
+        if personaje in dict_players:
+            self.player = db.PlayerEntity.from_entity(
+                dict_players[personaje])
             self.estado = self.Estados.PlayerTurn
         elif personaje == "Volver":
             self.estado = self.Estados.MenuPrincipal
 
-    def startNewGame(self):
+    def start_new_game(self):
         # Cargar nombres guardados
-        players = db.PlayerController.getAllPlayers()
-        playerNames = [x.name for x in players]
+        players = db.PlayerController.get_all_players()
+        player_names = [x.name for x in players]
         name = input("Pon un nombre a tu heroe: ")
-        if name in playerNames:
+        if name in player_names:
             sobreescribir = input(
                 "Ya existe un personaje con ese nombre.\nQuieres sobreescribirlo?Y/otra cosa para cancelar xD")
             if sobreescribir.upper() == 'Y':
-                db.PlayerController.deletePlayer(name)
+                db.PlayerController.delete_player(name)
             else:
                 self.estado = self.Estados.MenuPrincipal
                 return
@@ -138,7 +133,7 @@ class Game:
         print(text)
 
         self.player = None
-        while self.player == None:
+        while self.player is None:
             seleccionada = input("Selecciona una clase: ")
             if seleccionada in classes:
                 self.player = classes[seleccionada](name)
@@ -146,55 +141,55 @@ class Game:
             else:
                 print("Elección inválida", seleccionada)
 
-    def initializeGame(self):
+    def initialize_game(self):
 
         self.startingRound = 1
         self.enemiesKilled = 0
-        self.round = self.startingRound + int(self.enemiesKilled/10)
+        self.round = self.startingRound + int(self.enemiesKilled / 10)
         self.enemy = Enemy(1)
 
     def play(self):
         while not self.exit:
             if self.estado == self.Estados.MenuPrincipal:
                 if self.player is not None and self.player.dead:
-                    self._saveAction()
-                self.menuEstado()
+                    self._save_action()
+                self.menu_estado()
             elif self.estado == self.Estados.CrearPartida:
-                self.startNewGame()
+                self.start_new_game()
                 if self.estado == self.Estados.PlayerTurn:
-                    self.initializeGame()
+                    self.initialize_game()
             elif self.estado == self.Estados.CargarPartida:
-                self.loadGame()
+                self.load_game()
                 if self.estado == self.Estados.PlayerTurn:
-                    self.initializeGame()
+                    self.initialize_game()
             elif self.estado == self.Estados.PrePlayerTurn:
                 self.estado = self.Estados.PlayerTurn
-                self.preTurnActions(self.player, self.Estados.PostPlayerTurn)
+                self.pre_turn_actions(self.player, self.Estados.PostPlayerTurn)
             elif self.estado == self.Estados.PlayerTurn:
                 if self.enemy.dead:
                     self.enemiesKilled += 1
                     self.round = self.startingRound + \
-                        int(self.enemiesKilled / 10)
+                                 int(self.enemiesKilled / 10)
                     self.enemy = Enemy(self.round)
                     self.player.addExp(self.enemy)
                     self.player.addToInventory(self.enemy.drop())
-                self.playerMenuEstado()
+                self.player_menu_estado()
             elif self.estado == self.Estados.PostPlayerTurn:
-                self.postTurnActions(self.player)
+                self.post_turn_actions(self.player)
                 self.estado = self.Estados.EnemyTurn
             elif self.estado == self.Estados.Atacando:
-                self.atacandoEstado()
+                self.atacando_estado()
             elif self.estado == self.Estados.Inventario:
-                self.inventoryEstado()
+                self.inventory_estado()
             elif self.estado == self.Estados.EnemyTurn:
 
                 self.estado = self.Estados.PrePlayerTurn
-                self.preTurnActions(self.enemy, self.Estados.PrePlayerTurn)
-                self.enemyTurnEstado()
-                self.postTurnActions(self.enemy)
+                self.pre_turn_actions(self.enemy, self.Estados.PrePlayerTurn)
+                self.enemy_turn_estado()
+                self.post_turn_actions(self.enemy)
 
-    def menuEstado(self):
-        self._printMenu()
+    def menu_estado(self):
+        self._print_menu()
 
         option = input("\nSelecciona una opción: ")
         if option.isdigit():
@@ -209,35 +204,35 @@ class Game:
         else:
             print("Opción invalida")
 
-    def playerMenuEstado(self):
+    def player_menu_estado(self):
 
-        self.printPlayerMenu()
+        self.print_player_menu()
 
         option = input('Opcion elegida: ')
         if option.isdigit():
             option = int(option)
 
-        if option in [x.value for x in self._playerMenu]:
-            if option == self._playerMenu.Atacar.value:
+        if option in [x.value for x in self.PlayerMenu]:
+            if option == self.PlayerMenu.Atacar.value:
                 self.estado = self.Estados.Atacando
-            elif option == self._playerMenu.Defender.value:
+            elif option == self.PlayerMenu.Defender.value:
                 self.player.defend()
                 self.estado = self.Estados.PostPlayerTurn
-            elif option == self._playerMenu.Inventario.value:
+            elif option == self.PlayerMenu.Inventario.value:
                 self.estado = self.Estados.Inventario
-            elif option == self._playerMenu.Guardar.value:
-                self._saveAction()
-            elif option == self._playerMenu.Salir.value:
+            elif option == self.PlayerMenu.Guardar.value:
+                self._save_action()
+            elif option == self.PlayerMenu.Salir.value:
                 self.estado = self.Estados.MenuPrincipal
 
-    def atacandoEstado(self):
-        self.printAttackMenu()
+    def atacando_estado(self):
+        self.print_attack_menu()
         ataque = input('Seleccione un ataque: ')
 
         if ataque.isdigit() and 0 < int(ataque) <= len(self.player.attacks):
-            attack = self.player.selectAttack(ataque)
-            if self.player.hasMana(attack.manaCost):
-                self.player.launchAttack(
+            attack = self.player.select_attack(ataque)
+            if self.player.has_mana(attack.manaCost):
+                self.player.launch_attack(
                     self.enemy, attack)
 
                 self.estado = self.Estados.PostPlayerTurn
@@ -247,43 +242,41 @@ class Game:
         elif ataque.isdigit() and int(ataque) == 0:
             self.estado = self.Estados.PlayerTurn
 
-    def inventoryEstado(self):
+    def inventory_estado(self):
 
-        self.player.printInventory()
+        self.player.print_inventory()
 
         input()
 
         self.estado = self.Estados.PostPlayerTurn
 
-    def enemyTurnEstado(self):
+    def enemy_turn_estado(self):
 
         ataque = rand.randint(0, len(self.enemy.attacks) - 1)
-        self.enemy.launchAttack(self.player, self.enemy.attacks[ataque])
+        self.enemy.launch_attack(self.player, self.enemy.attacks[ataque])
         if self.player.dead:
             self.estado = self.Estados.MenuPrincipal
         else:
             self.estado = self.Estados.PrePlayerTurn
 
-    def preTurnActions(self, character, stunnedState):
+    def pre_turn_actions(self, character, stunned_state):
 
         character.reset()
 
         if character.Stunned:
-
-            self.estado = stunnedState
+            self.estado = stunned_state
 
             input("Press something to continue")
 
-    def postTurnActions(self, character):
+    def post_turn_actions(self, character):
 
-        character.checkInvariants()
+        character.check_invariants()
 
         if character.applyEffects():
             input("Press something to continue")
 
         if isinstance(character, Hero):
-
-            character.regenerateMana()
+            character.regenerate_mana()
 
     def main(self):
         self.play()

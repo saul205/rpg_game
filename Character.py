@@ -1,11 +1,10 @@
 import random as rand
+
+import Effects as Ef
 from AttackRepository import Attack
-import numpy as np
-import Effects as ef
 
 
 class Character:
-
     _baseHp = 100
     _baseMp = 100
     _attacks = [Attack()]
@@ -38,22 +37,24 @@ class Character:
         self.tempDR = []
 
     # region Prints
-    def printHp(self):
+    def print_hp(self):
         print(self.hp)
+
     # endregion
 
     # region Formulas
-    def _hpFormula(self):
-        return int(self._baseHp + (self.level ** self._hpScaling/self._hpScaling) + self._baseHp*self.level / 10)
+    def _hp_formula(self):
+        return int(self._baseHp + (self.level ** self._hpScaling / self._hpScaling) + self._baseHp * self.level / 10)
 
-    def _dmgFormula(self):
+    def _dmg_formula(self):
         return int(self._baseDmg * self.level)
+
     # endregion
 
     # region Character State
 
-    def hasMana(self, manaCost):
-        return self.mp >= manaCost
+    def has_mana(self, mana_cost):
+        return self.mp >= mana_cost
 
     def die(self):
         if self.hp > 0:
@@ -64,11 +65,11 @@ class Character:
 
     def reset(self):
 
-        self.tempDR = [(x, y-1) for x, y in self.tempDR if y > 1]
+        self.tempDR = [(x, y - 1) for x, y in self.tempDR if y > 1]
         self.defending = False
         self.manaRegen = True
 
-    def checkInvariants(self):
+    def check_invariants(self):
 
         if self.mp > self.maxMp:
             self.mp = self.maxMp
@@ -79,33 +80,34 @@ class Character:
     # endregion
 
     # region Combate
-    def launchAttack(self, target, attack):
+    def launch_attack(self, target, attack):
 
-        hit = target.getAttacked(self, attack)
+        hit = target.get_attacked(self, attack)
 
         if attack.costsMana:
-            self.consumeMana(attack.manaCost)
+            self.consume_mana(attack.manaCost)
 
-    def getAttacked(self, attacker, attackAction):
+    def get_attacked(self, attacker, attack_action):
         # Acciones pre-hit
 
         # Comprobar golpeo
-        if not attackAction.didHit():
+        if not attack_action.didHit():
             return False
 
         # Golpeo
-        amount = int(attackAction.dmgMultiplier *
+        amount = int(attack_action.dmgMultiplier *
                      attacker.dmg)
         self.lowerHpDR(amount)
 
         # After-hit
-        self.procEffects(attackAction.effects)
+        self.procEffects(attack_action.effects)
         return True
 
     def defend(self):
 
         self.defending = True
         self.tempDR.append((.5, 1))
+
     # endregion
 
     # region Efectos
@@ -115,62 +117,62 @@ class Character:
 
             roll = rand.uniform(0, 1)
             if roll <= effect.chance:
-
                 self.states[effect.state] = effect
 
-    def applyEffects(self):
+    def apply_effects(self):
 
-        effectApplied = False
+        effect_applied = False
         for effect in self.states:
-            effectApplied = True
+            effect_applied = True
             self.states[effect].apply(self)
 
-        return effectApplied
+        return effect_applied
 
     @property
-    def Stunned(self):
-        if ef.Effects.Stun in self.states:
-
-            self.states[ef.Effects.Stun].duration -= 1
-            self.states[ef.Effects.Stun].printMsg()
+    def stunned(self):
+        if Ef.Effects.Stun in self.states:
+            self.states[Ef.Effects.Stun].duration -= 1
+            self.states[Ef.Effects.Stun].print_msg()
             return True
 
         return False
+
     # endregion
 
     # region HP management
-    def __lowerHp(self, amount):
+    def _lower_hp(self, amount):
 
         self.hp -= amount
         self.die()
 
-    def lowerHpDR(self, amount):
+    def lower_hp_dr(self, amount):
 
         dr = 1 - (sum([x for x, y in self.tempDR]) + self.DR)
-        self.__lowerHp(amount * dr if dr >= 0 else 0)
+        self._lower_hp(amount * dr if dr >= 0 else 0)
 
-    def lowerHpStatus(self, dmg, percDmg):
+    def lower_hp_perc(self, dmg, perc_dmg):
 
         damage = dmg
-        if percDmg:
-            damage = self.hp * percDmg
+        if perc_dmg:
+            damage = self.hp * perc_dmg
 
-        self.__lowerHp(damage)
+        self._lower_hp(damage)
 
     def heal(self, amount):
 
         self.hp += amount
-        self.checkInvariants()
+        self.check_invariants()
+
     # endregion
 
     # region MP management
 
-    def restoreMana(self, amount):
+    def restore_mana(self, amount):
 
         self.mp += amount
-        self.checkInvariants()
+        self.check_invariants()
 
-    def consumeMana(self, amount):
+    def consume_mana(self, amount):
         self.mp -= amount
         self.manaRegen = False
 

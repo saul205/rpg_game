@@ -1,5 +1,6 @@
 import sqlalchemy as db
 from sqlalchemy.orm import Session, declarative_base
+
 import Classes as c
 
 engine = db.create_engine('sqlite:///test.db')
@@ -15,80 +16,77 @@ class PlayerEntity(Base):
     clase = db.Column(db.String)
 
     @staticmethod
-    def ToEntity(player):
+    def to_entity(player):
+        player_entity = PlayerEntity()
+        player_entity.name = player.name
+        player_entity.exp = player.exp
+        player_entity.level = player.level
+        player_entity.clase = player.clase
 
-        playerEntity = PlayerEntity()
-        playerEntity.name = player.name
-        playerEntity.exp = player.exp
-        playerEntity.level = player.level
-        playerEntity.clase = player._clase
-
-        return playerEntity
+        return player_entity
 
     @staticmethod
-    def FromEntity(playerEntity):
-
-        player = c.classes[playerEntity.clase](playerEntity.name)
-        player.addExpNumber(playerEntity.exp)
+    def from_entity(player_entity):
+        player = c.classes[player_entity.clase](player_entity.name)
+        player.add_exp_number(player_entity.exp)
 
         return player
 
     def __str__(self):
-
         return self.name + " - " + self.clase + " - " + str(self.level)
 
 
-class PlayerController():
+class PlayerController:
 
     @staticmethod
-    def getAllPlayers():
+    def get_all_players():
 
         with Session(engine) as session:
 
             try:
                 players = session.query(PlayerEntity).all()
                 return players
-            except:
+            except Exception:
                 session.rollback()
                 raise
 
     @staticmethod
-    def savePlayer(player):
+    def save_player(player):
 
         with Session(engine) as session:
-            playerEntity = PlayerEntity.ToEntity(player)
+            player_entity = PlayerEntity.to_entity(player)
             try:
-                session.add(playerEntity)
-            except:
+                session.add(player_entity)
+            except Exception:
                 session.rollback()
                 raise
             else:
                 session.commit()
 
     @staticmethod
-    def updatePlayer(player):
+    def update_player(player):
 
         with Session(engine) as session:
             try:
-                playerEntity = session.query(
+                player_entity = session.query(
                     PlayerEntity).filter_by(name=player.name).first()
-                playerEntity.level = player.level
-                playerEntity.exp = player.exp
-            except:
+                player_entity.level = player.level
+                player_entity.exp = player.exp
+            except Exception:
                 session.rollback()
                 raise
             else:
                 session.commit()
 
     @staticmethod
-    def deletePlayer(playerName):
+    def delete_player(player_name):
 
         with Session(engine) as session:
             try:
-                playerEntity = session.query(
-                    PlayerEntity).filter_by(name=playerName).first()
-                session.delete(playerEntity)
-            except:
+                player_entity = session.query(
+                    PlayerEntity).filter_by(name=player_name).first()
+                session.delete(player_entity)
+            except Exception:
                 session.rollback()
                 raise
             else:
@@ -108,13 +106,13 @@ with Session(engine) as session:
 
     print(archer2)
     archer2.exp = archer.exp
-    archer2.addExp(5000)
+    archer2.add_exp(5000)
     print(archer2)
 
 
     archer.name = archer2.name
     archer.exp = archer2.exp
-    archer.clase = archer2._clase
+    archer.clase = archer2.clase
 
     session.commit()
 
@@ -122,6 +120,6 @@ with Session(engine) as session:
         print(pe.name, pe.exp, pe.clase)
 
         a = c.classes[pe.clase](pe.name)
-        a.addExp(pe.exp)
+        a.add_exp(pe.exp)
 
         print(a)'''

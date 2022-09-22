@@ -3,7 +3,6 @@ from ItemRepository import Potion
 
 
 class Enemy(Character):
-
     _baseExp = 20
     _expScaling = 2.5
     _expLevelDiffScaling = 1.2
@@ -16,26 +15,25 @@ class Enemy(Character):
     def __init__(self, level):
         super().__init__()
         self.level = level
-        self.maxHp = self._hpFormula()
+        self.maxHp = self._hp_formula()
         self.hp = self.maxHp
-        self.dmg = self._dmgFormula()
+        self.dmg = self._dmg_formula()
 
-    def _expFormula(self, heroLvl):
-        return int(self._baseExp + ((self.level-1)**self._expLevelDiffScaling/heroLvl) ** self._expScaling)
+    def _exp_formula(self, heroLvl):
+        return int(self._baseExp + ((self.level - 1) ** self._expLevelDiffScaling / heroLvl) ** self._expScaling)
 
-    def _dmgFormula(self):
+    def _dmg_formula(self):
         return self._baseDmg * self.level + self.level ** 2.3 / self._baseDmg ** 2
 
     def __str__(self):
         result = "--------------------------------------" + \
-            "\n" + self._name + " Lvl " + str(self.level) + \
-            "\nHP " + str(self.hp) + "/" + str(self.maxHp) + \
-            "\n--------------------------------------"
+                 "\n" + self._name + " Lvl " + str(self.level) + \
+                 "\nHP " + str(self.hp) + "/" + str(self.maxHp) + \
+                 "\n--------------------------------------"
         return result
 
-    def expGiven(self, heroLvl):
-        return self._expFormula(heroLvl)
+    def exp_given(self, hero_lvl):
+        return self._exp_formula(hero_lvl)
 
     def drop(self):
-
         return self._drops
