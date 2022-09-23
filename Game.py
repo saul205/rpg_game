@@ -81,10 +81,10 @@ class Game:
     def _save_action(self):
 
         players = db.PlayerController.get_all_players()
-        dictPlayers = {}
+        dict_players = {}
         for player in players:
-            dictPlayers[player.name] = player
-        if self.player.name in dictPlayers:
+            dict_players[player.name] = player
+        if self.player.name in dict_players:
             db.PlayerController.update_player(self.player)
         else:
             db.PlayerController.save_player(self.player)
@@ -171,8 +171,8 @@ class Game:
                     self.round = self.startingRound + \
                                  int(self.enemiesKilled / 10)
                     self.enemy = Enemy(self.round)
-                    self.player.addExp(self.enemy)
-                    self.player.addToInventory(self.enemy.drop())
+                    self.player.add_exp(self.enemy)
+                    self.player.add_to_inventory(self.enemy.drop())
                 self.player_menu_estado()
             elif self.estado == self.Estados.PostPlayerTurn:
                 self.post_turn_actions(self.player)
@@ -263,7 +263,7 @@ class Game:
 
         character.reset()
 
-        if character.Stunned:
+        if character.stunned:
             self.estado = stunned_state
 
             input("Press something to continue")
@@ -272,7 +272,7 @@ class Game:
 
         character.check_invariants()
 
-        if character.applyEffects():
+        if character.apply_effects():
             input("Press something to continue")
 
         if isinstance(character, Hero):

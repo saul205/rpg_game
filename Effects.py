@@ -56,4 +56,4 @@ class Burn(Effect):
 
     def apply(self, character):
         self.print_msg()
-        character.lowerHpStatus(self.damage, self.percDmg)
+        character.lower_hp_status(self.damage, self.percDmg)

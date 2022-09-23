@@ -84,23 +84,23 @@ class Character:
 
         hit = target.get_attacked(self, attack)
 
-        if attack.costsMana:
+        if attack.costs_mana:
             self.consume_mana(attack.manaCost)
 
     def get_attacked(self, attacker, attack_action):
         # Acciones pre-hit
 
         # Comprobar golpeo
-        if not attack_action.didHit():
+        if not attack_action.did_hit():
             return False
 
         # Golpeo
         amount = int(attack_action.dmgMultiplier *
                      attacker.dmg)
-        self.lowerHpDR(amount)
+        self.lower_hp_dr(amount)
 
         # After-hit
-        self.procEffects(attack_action.effects)
+        self.proc_effects(attack_action.effects)
         return True
 
     def defend(self):
@@ -111,7 +111,7 @@ class Character:
     # endregion
 
     # region Efectos
-    def procEffects(self, effects):
+    def proc_effects(self, effects):
 
         for effect in effects:
 
@@ -150,7 +150,7 @@ class Character:
         dr = 1 - (sum([x for x, y in self.tempDR]) + self.DR)
         self._lower_hp(amount * dr if dr >= 0 else 0)
 
-    def lower_hp_perc(self, dmg, perc_dmg):
+    def lower_hp_status(self, dmg, perc_dmg):
 
         damage = dmg
         if perc_dmg:

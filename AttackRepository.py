@@ -1,6 +1,6 @@
 import random as rand
 
-import Effects as Ef
+import Effects as ef
 
 
 class Attack:
@@ -31,7 +31,7 @@ class Fireball(Attack):
     dmgMultiplier = 2
     manaCost = 25
     effects = [
-        Ef.Burn(2, 1, 10)
+        ef.Burn(2, 1, 10)
     ]
     name = 'Fireball'
 
