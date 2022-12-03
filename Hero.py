@@ -7,12 +7,13 @@ class Hero(Character):
     _hpScalingFactor = 2
     _dmScaling = 0.25
 
-    def __init__(self, name):
+    def __init__(self, name, id=0):
         super().__init__()
         self.exp = 0
         self.expToLevel = 120
         self.clase = self.__class__.__name__
         self.name = name
+        self.id = id
 
         # Initialize Inventory
         self.inventory = {}
@@ -85,21 +86,28 @@ class Hero(Character):
     # region Inventory
 
     def print_inventory(self):
-
-        result = "Inventory:"
         for item in self.inventory:
-            result += "\n\t-> " + str(self.inventory[item][1]) + " " + \
-                      str(self.inventory[item][0])
-
-        print(result)
+            print("\t-> " + str(self.inventory[item].amount) + " " + \
+                  str(self.inventory[item]))
 
     def add_to_inventory(self, items):
 
         for item in items:
             if item.name in self.inventory:
-                self.inventory[item.name][1] += 1
+                self.inventory[item.name].amount += 1
             else:
-                self.inventory[item.name] = [item, 1]
+                self.inventory[item.name] = item
+
+    def use(self, index):
+        print(self.inventory.values())
+        input("HOla " + str(index))
+
+        key = list(self.inventory)[index]
+        obj = self.inventory[key]
+        obj.use(self)
+
+        if obj.empty:
+            self.inventory.pop(key)
 
     # endregion
 

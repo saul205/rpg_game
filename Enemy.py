@@ -1,5 +1,5 @@
 from Character import *
-from ItemRepository import Potion
+from Repositories.Items.Consumables.Potion import Potion
 
 
 class Enemy(Character):

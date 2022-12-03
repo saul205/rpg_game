@@ -13,7 +13,7 @@ class Character:
     _name = 'Character'
 
     @property
-    def _hpScaling(self):
+    def _hp_scaling(self):
         return self._baseHp / 100 * self._hpScalingFactor
 
     def __init__(self):
@@ -44,7 +44,7 @@ class Character:
 
     # region Formulas
     def _hp_formula(self):
-        return int(self._baseHp + (self.level ** self._hpScaling / self._hpScaling) + self._baseHp * self.level / 10)
+        return int(self._baseHp + (self.level ** self._hp_scaling / self._hp_scaling) + self._baseHp * self.level / 10)
 
     def _dmg_formula(self):
         return int(self._baseDmg * self.level)

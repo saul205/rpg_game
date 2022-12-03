@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 
-import DB as db
+import Controllers.PlayerController as pc
 from Classes import *
 from Enemy import *
 from Hero import Hero
@@ -18,14 +18,14 @@ class Game:
     class Menu(Enum):
         Nueva_Partida = 1
         Cargar_Partida = 2
-        Cerrar_Juego = 3
+        Cerrar_Juego = 0
 
     class PlayerMenu(Enum):
+        Volver = 0
         Atacar = 1
         Defender = 2
         Inventario = 3
         Guardar = 4
-        Salir = 5
 
     class Estados(Enum):
         MenuPrincipal = 1
@@ -80,18 +80,18 @@ class Game:
 
     def _save_action(self):
 
-        players = db.PlayerController.get_all_players()
+        players = pc.PlayerController.get_all_players()
         dict_players = {}
         for player in players:
             dict_players[player.name] = player
         if self.player.name in dict_players:
-            db.PlayerController.update_player(self.player)
+            pc.PlayerController.update_player(self.player)
         else:
-            db.PlayerController.save_player(self.player)
+            pc.PlayerController.save_player(self.player)
 
     def load_game(self):
 
-        players = db.PlayerController.get_all_players()
+        players = pc.PlayerController.get_all_players()
 
         if len(players) == 0:
             return False
@@ -107,7 +107,7 @@ class Game:
 
         personaje = input("Escoge personaje: ")
         if personaje in dict_players:
-            self.player = db.PlayerEntity.from_entity(
+            self.player = pc.PlayerEntity.from_entity(
                 dict_players[personaje])
             self.estado = self.Estados.PlayerTurn
         elif personaje == "Volver":
@@ -115,14 +115,14 @@ class Game:
 
     def start_new_game(self):
         # Cargar nombres guardados
-        players = db.PlayerController.get_all_players()
+        players = pc.PlayerController.get_all_players()
         player_names = [x.name for x in players]
         name = input("Pon un nombre a tu heroe: ")
         if name in player_names:
             sobreescribir = input(
                 "Ya existe un personaje con ese nombre.\nQuieres sobreescribirlo?Y/otra cosa para cancelar xD")
             if sobreescribir.upper() == 'Y':
-                db.PlayerController.delete_player(name)
+                pc.PlayerController.delete_player(name)
             else:
                 self.estado = self.Estados.MenuPrincipal
                 return
@@ -168,8 +168,7 @@ class Game:
             elif self.estado == self.Estados.PlayerTurn:
                 if self.enemy.dead:
                     self.enemiesKilled += 1
-                    self.round = self.startingRound + \
-                                 int(self.enemiesKilled / 10)
+                    self.round = self.startingRound + int(self.enemiesKilled / 10)
                     self.enemy = Enemy(self.round)
                     self.player.add_exp(self.enemy)
                     self.player.add_to_inventory(self.enemy.drop())
@@ -195,11 +194,11 @@ class Game:
         if option.isdigit():
             option = int(option)
 
-        if option == 1:
+        if option == self.Menu.Nueva_Partida.value:
             self.estado = self.Estados.CrearPartida
-        elif option == 2:
+        elif option == self.Menu.Cargar_Partida.value:
             self.estado = self.Estados.CargarPartida
-        elif option == 3:
+        elif option == self.Menu.Cerrar_Juego.value:
             self.exit = True
         else:
             print("Opción invalida")
@@ -222,7 +221,7 @@ class Game:
                 self.estado = self.Estados.Inventario
             elif option == self.PlayerMenu.Guardar.value:
                 self._save_action()
-            elif option == self.PlayerMenu.Salir.value:
+            elif option == self.PlayerMenu.Volver.value:
                 self.estado = self.Estados.MenuPrincipal
 
     def atacando_estado(self):
@@ -244,11 +243,17 @@ class Game:
 
     def inventory_estado(self):
 
+        print('Inventario: ')
+        print('\t- 0: Volver')
         self.player.print_inventory()
 
-        input()
-
-        self.estado = self.Estados.PostPlayerTurn
+        selected = input("Elije objeto para usar: ")
+        print(len(self.player.inventory))
+        if selected == '0':
+            self.estado = self.Estados.PlayerTurn
+        elif selected.isdigit() and int(selected) in range(1, len(self.player.inventory) + 1):
+            self.player.use(int(selected) - 1)
+            self.estado = self.Estados.PostPlayerTurn
 
     def enemy_turn_estado(self):
 
@@ -271,7 +276,7 @@ class Game:
     def post_turn_actions(self, character):
 
         character.check_invariants()
-
+        self._print_header()
         if character.apply_effects():
             input("Press something to continue")
 

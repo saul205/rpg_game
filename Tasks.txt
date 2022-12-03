@@ -1,9 +1,6 @@
 Por hacer:
 
--Implementar inventario
--Consumibles
 -Equipo
--Drops
 -Mejorar los crecimientos de exp, vida, daño
 -Crear distintos tipos de enemigos -> idea es que cada ronda(10 enemigos) tenga una coleccion de enemigos(se pueden repetir entre rondas)
     ->Los nuevos enemigos que aparecen en rondas más altas tendran mayores stats base
@@ -15,4 +12,6 @@ Tras tener el juego base:
 -Añadir mini interfaz gráfica para funcionar con clicks
 
 Haciendo:
--Implementar inventario
+- Implementar inventario
+- Consumibles
+- Drops
